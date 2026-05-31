@@ -1,0 +1,13 @@
+.env
+config.json
+chroma_db/
+output/
+logs/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.pytest_cache/
+mem.md
+AGENTS.md
+SKILL.md

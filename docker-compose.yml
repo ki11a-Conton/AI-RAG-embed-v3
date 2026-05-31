@@ -1,0 +1,47 @@
+services:
+  rag:
+    build: .
+    ports:
+      - "8501:8501"   # Streamlit Web UI
+    volumes:
+      - ./documents:/app/documents
+      - ./chroma_db:/app/chroma_db
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      # 国内部署保留此行；境外部署可设为空字符串覆盖 Dockerfile 的默认值
+      - HF_ENDPOINT=https://hf-mirror.com
+
+  api:
+    build: .
+    command: uvicorn api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"   # FastAPI HTTP API
+    volumes:
+      - ./documents:/app/documents
+      - ./chroma_db:/app/chroma_db
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+
+  watch:
+    build: .
+    # Watches the default knowledge base (documents/).
+    # For a named knowledge base, add the --kb flag:
+    #   command: python watch.py --kb project_a --debounce 10
+    # and mount the corresponding knowledge base directories:
+    #   volumes:
+    #     - ./knowledge_bases/project_a/documents:/app/knowledge_bases/project_a/documents
+    #     - ./knowledge_bases/project_a/chroma_db:/app/knowledge_bases/project_a/chroma_db
+    command: python watch.py --debounce 10
+    volumes:
+      - ./documents:/app/documents
+      - ./chroma_db:/app/chroma_db
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
